@@ -1029,3 +1029,116 @@ listaExtrato.textContent =
     "Nenhuma movimentação registrada.";
 
 atualizarTipoOperacao();
+
+
+// ==========================================
+// COMPARTILHAR PARTIDA
+// ==========================================
+
+const btnCompartilhar =
+    document.getElementById("btnCompartilhar");
+
+// Criar link de convite
+function gerarLinkPartida() {
+    const link = new URL(window.location.href);
+
+    link.searchParams.set("sala", codigoAtual);
+
+    return link.toString();
+}
+
+// Compartilhar com amigos
+btnCompartilhar.addEventListener("click", async function() {
+
+    if (!codigoAtual) {
+        alert("Crie ou entre em uma partida primeiro.");
+        return;
+    }
+
+    const link = gerarLinkPartida();
+
+    const mensagem =
+        "Venha jogar Banco Imobiliário Online comigo!\n\n" +
+        "Entre na minha partida pelo link:\n" +
+        link;
+
+    // Compartilhamento nativo do celular
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: "Banco Imobiliário Online",
+                text: mensagem
+            });
+
+            return;
+        } catch (erro) {
+            if (erro.name === "AbortError") {
+                return;
+            }
+
+            console.error("Erro ao compartilhar:", erro);
+        }
+    }
+
+    // Copiar o convite no computador
+    try {
+        await navigator.clipboard.writeText(mensagem);
+
+        alert(
+            "Convite copiado!\n\n" +
+            "Agora cole no WhatsApp e envie aos seus amigos."
+        );
+
+    } catch (erro) {
+        window.prompt(
+            "Copie o link da partida:",
+            link
+        );
+    }
+});
+
+// ==========================================
+// ENTRAR NA PARTIDA PELO LINK
+// ==========================================
+
+async function verificarConvite() {
+
+    const parametros = new URLSearchParams(
+        window.location.search
+    );
+
+    const codigoConvite = parametros.get("sala");
+
+    if (!codigoConvite) {
+        return;
+    }
+
+    // Mostrar o código no campo de entrada
+    campoCodigo.value = codigoConvite;
+
+    try {
+        await autenticacaoPronta;
+
+        const resultado = await getDoc(
+            referenciaPartida(codigoConvite)
+        );
+
+        if (!resultado.exists()) {
+            alert("A partida deste convite não foi encontrada.");
+            return;
+        }
+
+        // Abrir a partida automaticamente
+        mostrarPartida(codigoConvite);
+
+    } catch (erro) {
+        mostrarErro(
+            erro,
+            "Não foi possível abrir o convite."
+        );
+    }
+}
+
+// Verificar convite ao carregar o site
+verificarConvite();
+

@@ -32,7 +32,7 @@
             com seus amigos em tempo real.
         </p>
 
-        <button id="btnCriar">
+        <button id="btnCriar" type="button">
             CRIAR PARTIDA
         </button>
 
@@ -44,7 +44,7 @@
             placeholder="Digite o código da partida"
         >
 
-        <button id="btnEntrar">
+        <button id="btnEntrar" type="button">
             ENTRAR NA PARTIDA
         </button>
 
@@ -65,14 +65,23 @@
 
         <div id="codigoExibido"></div>
 
+        <!-- NOVO BOTÃO DE COMPARTILHAMENTO -->
+        <button
+            id="btnCompartilhar"
+            type="button"
+        >
+            COMPARTILHAR PARTIDA
+        </button>
+
         <input
             type="text"
             id="nomeJogador"
             placeholder="Digite seu nome"
             maxlength="40"
+            style="margin-top: 20px;"
         >
 
-        <button id="btnAdicionar">
+        <button id="btnAdicionar" type="button">
             ENTRAR COMO JOGADOR
         </button>
 
@@ -135,6 +144,7 @@
 
         </div>
 
+        <!-- VALOR -->
         <label for="valorOperacao">
             Valor (R$)
         </label>
@@ -147,6 +157,7 @@
             step="0.01"
         >
 
+        <!-- MOTIVO -->
         <label for="motivoOperacao">
             Motivo (opcional)
         </label>
@@ -158,7 +169,10 @@
             maxlength="100"
         >
 
-        <button id="btnConfirmarOperacao">
+        <button
+            id="btnConfirmarOperacao"
+            type="button"
+        >
             CONFIRMAR OPERAÇÃO
         </button>
 
@@ -176,6 +190,13 @@
         <div id="listaExtrato">
             <p>Nenhuma movimentação registrada.</p>
         </div>
+
+        <button
+            id="btnImprimirExtrato"
+            type="button"
+        >
+            IMPRIMIR EXTRATO
+        </button>
 
     </section>
 
@@ -227,6 +248,7 @@
 
     </section>
 
+    <!-- RODAPÉ -->
     <footer>
         Banco Imobiliário Online © 2026
     </footer>
