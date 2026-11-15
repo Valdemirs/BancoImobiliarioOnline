@@ -1,0 +1,417 @@
+
+/* CONFIGURAÇÕES GERAIS */
+
+:root {
+    --azul: #15365b;
+    --azul-claro: #24558a;
+    --verde: #16804a;
+    --verde-escuro: #116639;
+    --vermelho: #dc3545;
+    --fundo: #eef2f7;
+    --texto: #1d2939;
+    --cinza: #667085;
+    --borda: #e4e9f1;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(
+        145deg,
+        #e8eff8,
+        #f7f9fc
+    );
+    color: var(--texto);
+    min-height: 100vh;
+}
+
+/* CONTAINER PRINCIPAL */
+
+.container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 35px 20px;
+}
+
+/* CABEÇALHO */
+
+.topo {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.topo h1 {
+    color: var(--azul);
+    font-size: 32px;
+    letter-spacing: 2px;
+    font-weight: 800;
+}
+
+.topo p {
+    color: var(--cinza);
+    margin-top: 10px;
+    font-size: 15px;
+}
+
+/* CARTÕES */
+
+.card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 460px;
+    padding: 30px;
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(21, 54, 91, 0.08);
+    text-align: center;
+    border: 1px solid var(--borda);
+}
+
+.card h2 {
+    color: var(--azul);
+    margin-bottom: 16px;
+    font-size: 23px;
+}
+
+.card p {
+    color: var(--cinza);
+    line-height: 1.5;
+    margin-bottom: 18px;
+}
+
+/* BOTÕES */
+
+button {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--azul);
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: background 0.2s, transform 0.2s;
+}
+
+button:hover {
+    background: var(--azul-claro);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* CAMPOS */
+
+input,
+select {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #d0d5dd;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    background: white;
+    color: var(--texto);
+}
+
+input:focus,
+select:focus {
+    border-color: var(--azul-claro);
+    box-shadow: 0 0 0 3px rgba(36, 85, 138, 0.1);
+}
+
+input:disabled,
+select:disabled {
+    background: #f2f4f7;
+    cursor: not-allowed;
+}
+
+label {
+    display: block;
+    text-align: left;
+    font-size: 14px;
+    font-weight: bold;
+    color: #344054;
+    margin-top: 18px;
+    margin-bottom: 8px;
+}
+
+/* SEPARADOR */
+
+.separador {
+    margin: 24px 0;
+    color: #98a2b3;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* CÓDIGO DA PARTIDA */
+
+#codigoExibido {
+    background: #e8f0fa;
+    color: var(--azul);
+    padding: 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    margin: 20px 0;
+    overflow-wrap: anywhere;
+    border: 1px dashed #a6bfdc;
+}
+
+/* LISTA DE JOGADORES */
+
+#listaJogadores {
+    margin-top: 20px;
+    text-align: left;
+}
+
+#listaJogadores p {
+    background: #f1f5fa;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    color: var(--azul);
+    font-weight: bold;
+    border: 1px solid #e3eaf3;
+}
+
+/* ÁREA DO BANCO */
+
+#areaBanco {
+    border-top: 5px solid var(--azul);
+}
+
+#meuNome {
+    font-size: 17px;
+    font-weight: bold;
+    color: #344054;
+}
+
+#meuSaldo {
+    font-size: 36px;
+    color: var(--verde);
+    margin: 15px 0 25px;
+    overflow-wrap: anywhere;
+}
+
+#tipoOperacao {
+    cursor: pointer;
+}
+
+#areaDestinatario {
+    margin-top: 10px;
+}
+
+#valorOperacao {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#btnConfirmarOperacao {
+    background: var(--verde);
+    margin-top: 25px;
+}
+
+#btnConfirmarOperacao:hover {
+    background: var(--verde-escuro);
+}
+
+/* EXTRATO */
+
+#areaExtrato {
+    text-align: left;
+    border-top: 5px solid var(--verde);
+}
+
+#areaExtrato h2 {
+    text-align: center;
+}
+
+#listaExtrato {
+    margin-top: 20px;
+}
+
+#listaExtrato > div {
+    background: #f8fafc;
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    padding: 15px !important;
+    margin-bottom: 12px;
+    overflow-wrap: anywhere;
+}
+
+#listaExtrato strong {
+    display: block;
+    color: var(--azul);
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+#listaExtrato p {
+    background: transparent;
+    padding: 0;
+    margin: 8px 0;
+    font-size: 14px;
+    color: #344054;
+}
+
+#listaExtrato small {
+    display: block;
+    color: #98a2b3;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* CONTROLE DA PARTIDA */
+
+#areaFinalizar {
+    border-top: 5px solid var(--vermelho);
+}
+
+#statusPartida {
+    background: #eaf7ef;
+    color: var(--verde-escuro);
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+#btnFinalizar {
+    background: var(--vermelho) !important;
+    margin-top: 18px;
+}
+
+#btnFinalizar:hover {
+    background: #b52b39 !important;
+}
+
+/* RESULTADO FINAL */
+
+#areaResultado {
+    border-top: 5px solid #e5b94b;
+}
+
+#tituloVencedor {
+    color: var(--azul);
+    margin: 18px 0;
+    font-size: 20px;
+}
+
+#nomeVencedor {
+    font-size: 25px;
+    font-weight: bold;
+    color: var(--azul);
+    overflow-wrap: anywhere;
+}
+
+#saldoVencedor {
+    color: var(--verde);
+    font-size: 30px;
+    margin: 15px 0;
+}
+
+#rankingFinal {
+    text-align: left;
+    margin: 20px 0;
+}
+
+#rankingFinal p {
+    background: #f5f7fa;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    color: var(--texto);
+}
+
+/* RODAPÉ */
+
+footer {
+    margin-top: 30px;
+    color: #98a2b3;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 480px) {
+    .container {
+        padding: 20px 12px;
+    }
+
+    .card {
+        padding: 24px 18px;
+        border-radius: 15px;
+    }
+
+    .topo h1 {
+        font-size: 26px;
+    }
+
+    #meuSaldo {
+        font-size: 30px;
+    }
+
+    #saldoVencedor {
+        font-size: 26px;
+    }
+
+    button {
+        font-size: 14px;
+    }
+}
+
+/* IMPRESSÃO */
+
+@media print {
+    body {
+        background: white;
+    }
+
+    .container {
+        display: block;
+        padding: 0;
+    }
+
+    .topo,
+    #areaInicial,
+    #areaJogadores,
+    #areaBanco,
+    #areaFinalizar,
+    #areaResultado,
+    footer,
+    #btnImprimirExtrato {
+        display: none !important;
+    }
+
+    #areaExtrato {
+        display: block !important;
+        border: none;
+        box-shadow: none;
+        max-width: 100%;
+        padding: 10px;
+    }
+
+    #listaExtrato > div {
+        break-inside: avoid;
+    }
+}

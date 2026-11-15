@@ -1,0 +1,406 @@
+
+import { db, auth, autenticacaoPronta } from "./firebase.js";
+
+import {
+    doc,
+    setDoc,
+    getDoc,
+    collection,
+    onSnapshot,
+    runTransaction
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+// ELEMENTOS DA TELA
+
+const btnCriar = document.getElementById("btnCriar");
+const btnEntrar = document.getElementById("btnEntrar");
+const campoCodigo = document.getElementById("codigoSala");
+
+const areaJogadores = document.getElementById("areaJogadores");
+const codigoExibido = document.getElementById("codigoExibido");
+const nomeJogador = document.getElementById("nomeJogador");
+const btnAdicionar = document.getElementById("btnAdicionar");
+const listaJogadores = document.getElementById("listaJogadores");
+
+const areaBanco = document.getElementById("areaBanco");
+const areaExtrato = document.getElementById("areaExtrato");
+
+const meuNome = document.getElementById("meuNome");
+const meuSaldo = document.getElementById("meuSaldo");
+
+const tipoOperacao = document.getElementById("tipoOperacao");
+const areaDestinatario = document.getElementById("areaDestinatario");
+const jogadorDestino = document.getElementById("jogadorDestino");
+const valorOperacao = document.getElementById("valorOperacao");
+const motivoOperacao = document.getElementById("motivoOperacao");
+const btnConfirmarOperacao =
+    document.getElementById("btnConfirmarOperacao");
+
+const listaExtrato = document.getElementById("listaExtrato");
+
+// VARIÁVEIS
+
+let codigoAtual = "";
+let jogadores = [];
+let pararEscuta = null;
+let meuJogador = null;
+
+// FORMATAÇÃO DO DINHEIRO
+
+function formatarDinheiro(valor) {
+    return Number(valor).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+}
+
+// ATUALIZAR LISTA DE JOGADORES
+
+function atualizarJogadores() {
+    listaJogadores.innerHTML = "";
+
+    jogadores.forEach(function(jogador) {
+        const item = document.createElement("p");
+
+        item.textContent =
+            jogador.nome + " - " +
+            formatarDinheiro(jogador.saldo);
+
+        listaJogadores.appendChild(item);
+    });
+}
+
+// ATUALIZAR MINHA CONTA
+
+function atualizarMinhaConta() {
+    const usuario = auth.currentUser;
+
+    meuJogador = usuario
+        ? jogadores.find(function(jogador) {
+            return jogador.uid === usuario.uid;
+        })
+        : null;
+
+    if (!meuJogador) {
+        areaBanco.style.display = "none";
+        areaExtrato.style.display = "none";
+        return;
+    }
+
+    meuNome.textContent = meuJogador.nome;
+    meuSaldo.textContent = formatarDinheiro(meuJogador.saldo);
+
+    areaBanco.style.display = "block";
+    areaExtrato.style.display = "block";
+
+    atualizarDestinatarios();
+}
+
+// ATUALIZAR JOGADORES PARA TRANSFERÊNCIA
+
+function atualizarDestinatarios() {
+    const destinoSelecionado = jogadorDestino.value;
+
+    jogadorDestino.innerHTML = "";
+
+    const opcaoInicial = document.createElement("option");
+    opcaoInicial.value = "";
+    opcaoInicial.textContent = "Selecione um jogador";
+
+    jogadorDestino.appendChild(opcaoInicial);
+
+    jogadores.forEach(function(jogador) {
+        if (jogador.uid === auth.currentUser.uid) {
+            return;
+        }
+
+        const opcao = document.createElement("option");
+
+        opcao.value = jogador.uid;
+        opcao.textContent = jogador.nome;
+
+        jogadorDestino.appendChild(opcao);
+    });
+
+    const destinoAindaExiste = jogadores.some(function(jogador) {
+        return jogador.uid === destinoSelecionado
+            && jogador.uid !== auth.currentUser.uid;
+    });
+
+    if (destinoAindaExiste) {
+        jogadorDestino.value = destinoSelecionado;
+    }
+}
+
+// MOSTRAR CAMPOS DA OPERAÇÃO
+
+function atualizarTipoOperacao() {
+    if (tipoOperacao.value === "transferir") {
+        areaDestinatario.style.display = "block";
+    } else {
+        areaDestinatario.style.display = "none";
+    }
+}
+
+tipoOperacao.addEventListener(
+    "change",
+    atualizarTipoOperacao
+);
+
+// ACOMPANHAR JOGADORES EM TEMPO REAL
+
+function acompanharJogadores(codigo) {
+    if (pararEscuta) {
+        pararEscuta();
+        pararEscuta = null;
+    }
+
+    jogadores = [];
+    meuJogador = null;
+
+    atualizarJogadores();
+    atualizarMinhaConta();
+
+    const jogadoresRef = collection(
+        db,
+        "partidas",
+        codigo,
+        "jogadores"
+    );
+
+    pararEscuta = onSnapshot(
+        jogadoresRef,
+        function(resultado) {
+            // Ignorar respostas de partidas anteriores
+            if (codigo !== codigoAtual) {
+                return;
+            }
+
+            jogadores = resultado.docs.map(function(documento) {
+                return documento.data();
+            });
+
+            jogadores.sort(function(a, b) {
+                return a.nome.localeCompare(b.nome);
+            });
+
+            atualizarJogadores();
+            atualizarMinhaConta();
+        },
+        function(erro) {
+            console.error(
+                "Erro ao acompanhar jogadores:",
+                erro
+            );
+
+            alert(
+                "Não foi possível atualizar a lista de jogadores."
+            );
+        }
+    );
+}
+
+// MOSTRAR PARTIDA
+
+function mostrarPartida(codigo) {
+    codigoAtual = codigo;
+
+    codigoExibido.textContent =
+        "Código da partida: " + codigoAtual;
+
+    areaJogadores.style.display = "block";
+
+    acompanharJogadores(codigoAtual);
+}
+
+// CRIAR PARTIDA
+
+btnCriar.addEventListener("click", async function() {
+    btnCriar.disabled = true;
+
+    try {
+        await autenticacaoPronta;
+
+        const partidaRef = doc(
+            collection(db, "partidas")
+        );
+
+        await setDoc(partidaRef, {
+            codigo: partidaRef.id,
+            criadaEm: new Date(),
+            status: "aguardando",
+            criadorUid: auth.currentUser.uid
+        });
+
+        mostrarPartida(partidaRef.id);
+
+        alert("Partida criada com sucesso!");
+
+    } catch (erro) {
+        console.error("Erro ao criar partida:", erro);
+
+        alert("Não foi possível criar a partida.");
+    } finally {
+        btnCriar.disabled = false;
+    }
+});
+
+// ENTRAR NA PARTIDA
+
+btnEntrar.addEventListener("click", async function() {
+    const codigo = campoCodigo.value.trim();
+
+    if (codigo === "") {
+        alert("Digite o código da partida!");
+        return;
+    }
+
+    btnEntrar.disabled = true;
+
+    try {
+        await autenticacaoPronta;
+
+        const partidaRef = doc(
+            db,
+            "partidas",
+            codigo
+        );
+
+        const partida = await getDoc(partidaRef);
+
+        if (partida.exists()) {
+            mostrarPartida(codigo);
+
+            alert("Você entrou na partida!");
+        } else {
+            alert(
+                "Partida não encontrada. Verifique o código."
+            );
+        }
+
+    } catch (erro) {
+        console.error("Erro ao entrar na partida:", erro);
+
+        alert("Erro ao consultar a partida no Firebase.");
+    } finally {
+        btnEntrar.disabled = false;
+    }
+});
+
+// ENTRAR COMO JOGADOR
+
+btnAdicionar.addEventListener("click", async function() {
+    if (!codigoAtual) {
+        alert("Crie ou entre em uma partida primeiro!");
+        return;
+    }
+
+    const nome = nomeJogador.value.trim();
+
+    if (nome === "") {
+        alert("Digite seu nome!");
+        return;
+    }
+
+    if (nome.length > 40) {
+        alert("O nome deve ter no máximo 40 caracteres.");
+        return;
+    }
+
+    btnAdicionar.disabled = true;
+
+    try {
+        await autenticacaoPronta;
+
+        const jogadorRef = doc(
+            db,
+            "partidas",
+            codigoAtual,
+            "jogadores",
+            auth.currentUser.uid
+        );
+
+        await runTransaction(db, async function(transacao) {
+            const jogadorExistente =
+                await transacao.get(jogadorRef);
+
+            if (jogadorExistente.exists()) {
+                throw new Error("JOGADOR_JA_CADASTRADO");
+            }
+
+            transacao.set(jogadorRef, {
+                uid: auth.currentUser.uid,
+                nome: nome,
+                saldo: 25000
+            });
+        });
+
+        nomeJogador.value = "";
+
+        alert("Jogador adicionado com sucesso!");
+
+    } catch (erro) {
+        if (erro.message === "JOGADOR_JA_CADASTRADO") {
+            alert("Você já está cadastrado nesta partida!");
+        } else {
+            console.error(
+                "Erro ao adicionar jogador:",
+                erro
+            );
+
+            alert("Não foi possível adicionar o jogador.");
+        }
+    } finally {
+        btnAdicionar.disabled = false;
+    }
+});
+
+// OPERAÇÕES FINANCEIRAS
+// Nesta etapa, ainda não alteramos os saldos.
+
+btnConfirmarOperacao.addEventListener(
+    "click",
+    function() {
+        if (!meuJogador) {
+            alert("Entre como jogador primeiro!");
+            return;
+        }
+
+        const tipo = tipoOperacao.value;
+        const valor = Number(valorOperacao.value);
+        const motivo = motivoOperacao.value.trim();
+
+        if (!Number.isFinite(valor) || valor <= 0) {
+            alert("Digite um valor válido maior que zero.");
+            return;
+        }
+
+        if (tipo === "transferir" && !jogadorDestino.value) {
+            alert("Selecione o jogador que receberá o dinheiro.");
+            return;
+        }
+
+        if (
+            (tipo === "pagar" || tipo === "transferir") &&
+            valor > meuJogador.saldo
+        ) {
+            alert("Saldo insuficiente.");
+            return;
+        }
+
+        alert(
+            "A tela está pronta! " +
+            "No próximo passo vamos ativar as operações " +
+            "com segurança no Firebase."
+        );
+    }
+);
+
+// EXTRATO INICIAL
+
+listaExtrato.innerHTML =
+    "<p>Nenhuma movimentação registrada.</p>";
+
+// CONFIGURAÇÃO INICIAL
+
+atualizarTipoOperacao();

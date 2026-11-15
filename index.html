@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Banco Imobiliário Online</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<main class="container">
+
+    <!-- CABEÇALHO -->
+    <header class="topo">
+        <h1>BANCO DIGITAL</h1>
+        <p>Banco Imobiliário Online</p>
+    </header>
+
+    <!-- CRIAR OU ENTRAR NA PARTIDA -->
+    <section class="card" id="areaInicial">
+
+        <h2>Bem-vindo ao jogo!</h2>
+
+        <p>
+            Gerencie seu dinheiro e jogue
+            com seus amigos em tempo real.
+        </p>
+
+        <button id="btnCriar">
+            CRIAR PARTIDA
+        </button>
+
+        <div class="separador">OU</div>
+
+        <input
+            type="text"
+            id="codigoSala"
+            placeholder="Digite o código da partida"
+        >
+
+        <button id="btnEntrar">
+            ENTRAR NA PARTIDA
+        </button>
+
+    </section>
+
+    <!-- JOGADORES DA PARTIDA -->
+    <section
+        class="card"
+        id="areaJogadores"
+        style="display: none; margin-top: 20px;"
+    >
+
+        <h2>Jogadores da partida</h2>
+
+        <p>
+            Compartilhe o código e reúna seus amigos!
+        </p>
+
+        <div id="codigoExibido"></div>
+
+        <input
+            type="text"
+            id="nomeJogador"
+            placeholder="Digite seu nome"
+            maxlength="40"
+        >
+
+        <button id="btnAdicionar">
+            ENTRAR COMO JOGADOR
+        </button>
+
+        <div id="listaJogadores"></div>
+
+    </section>
+
+    <!-- ÁREA DO BANCO DIGITAL -->
+    <section
+        class="card"
+        id="areaBanco"
+        style="display: none; margin-top: 20px;"
+    >
+
+        <h2>Minha conta</h2>
+
+        <p id="meuNome">Jogador</p>
+
+        <p>Saldo disponível</p>
+
+        <h2 id="meuSaldo">R$ 25.000,00</h2>
+
+        <div class="separador">
+            MOVIMENTAR DINHEIRO
+        </div>
+
+        <label for="tipoOperacao">
+            Escolha a operação
+        </label>
+
+        <select id="tipoOperacao">
+            <option value="receber">
+                Receber do banco
+            </option>
+
+            <option value="pagar">
+                Pagar ao banco
+            </option>
+
+            <option value="transferir">
+                Transferir para jogador
+            </option>
+        </select>
+
+        <!-- DESTINATÁRIO -->
+        <div
+            id="areaDestinatario"
+            style="display: none;"
+        >
+
+            <label for="jogadorDestino">
+                Escolha o jogador
+            </label>
+
+            <select id="jogadorDestino">
+                <option value="">
+                    Selecione um jogador
+                </option>
+            </select>
+
+        </div>
+
+        <label for="valorOperacao">
+            Valor (R$)
+        </label>
+
+        <input
+            type="number"
+            id="valorOperacao"
+            placeholder="Digite o valor"
+            min="0.01"
+            step="0.01"
+        >
+
+        <label for="motivoOperacao">
+            Motivo (opcional)
+        </label>
+
+        <input
+            type="text"
+            id="motivoOperacao"
+            placeholder="Ex.: aluguel, prêmio, imposto"
+            maxlength="100"
+        >
+
+        <button id="btnConfirmarOperacao">
+            CONFIRMAR OPERAÇÃO
+        </button>
+
+    </section>
+
+    <!-- EXTRATO -->
+    <section
+        class="card"
+        id="areaExtrato"
+        style="display: none; margin-top: 20px;"
+    >
+
+        <h2>Extrato de movimentações</h2>
+
+        <div id="listaExtrato">
+            <p>Nenhuma movimentação registrada.</p>
+        </div>
+
+    </section>
+
+    <!-- FINALIZAR PARTIDA -->
+    <section
+        class="card"
+        id="areaFinalizar"
+        style="display: none; margin-top: 20px;"
+    >
+
+        <h2>Controle da partida</h2>
+
+        <p id="statusPartida">
+            Partida em andamento
+        </p>
+
+        <button
+            id="btnFinalizar"
+            type="button"
+            style="background-color: #dc3545;"
+        >
+            FINALIZAR PARTIDA
+        </button>
+
+    </section>
+
+    <!-- RESULTADO FINAL -->
+    <section
+        class="card"
+        id="areaResultado"
+        style="display: none; margin-top: 20px;"
+    >
+
+        <h2>Resultado final</h2>
+
+        <h3 id="tituloVencedor">
+            Vencedor da partida
+        </h3>
+
+        <p id="nomeVencedor"></p>
+
+        <h2 id="saldoVencedor"></h2>
+
+        <div id="rankingFinal"></div>
+
+        <p>
+            Partida encerrada!
+        </p>
+
+    </section>
+
+    <footer>
+        Banco Imobiliário Online © 2026
+    </footer>
+
+</main>
+
+<script type="module" src="script.js"></script>
+
+</body>
+</html>
