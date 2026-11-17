@@ -65,7 +65,6 @@
 
         <div id="codigoExibido"></div>
 
-        <!-- NOVO BOTÃO DE COMPARTILHAMENTO -->
         <button
             id="btnCompartilhar"
             type="button"
@@ -73,6 +72,7 @@
             COMPARTILHAR PARTIDA
         </button>
 
+        <!-- NOME DO JOGADOR -->
         <input
             type="text"
             id="nomeJogador"
@@ -81,10 +81,152 @@
             style="margin-top: 20px;"
         >
 
+        <!-- ESCOLHA DO PIÃO -->
+        <div
+            id="areaEscolhaPiao"
+            style="margin-top: 20px;"
+        >
+
+            <label id="tituloEscolhaPiao">
+                Escolha a cor do seu pião
+            </label>
+
+            <p>
+                Cada cor pode ser escolhida por
+                apenas um jogador na partida.
+            </p>
+
+            <div
+                class="cores-pioes"
+                id="coresPioes"
+                role="group"
+                aria-labelledby="tituloEscolhaPiao"
+            >
+
+                <!-- AMARELO -->
+                <button
+                    type="button"
+                    class="cor-piao"
+                    data-cor="amarelo"
+                    aria-label="Pião amarelo"
+                    aria-pressed="false"
+                    title="Amarelo"
+                >
+                    <span
+                        class="piao-icone"
+                        style="color: #f0c400;"
+                        aria-hidden="true"
+                    >♟</span>
+
+                    <span>Amarelo</span>
+                </button>
+
+                <!-- PRETO -->
+                <button
+                    type="button"
+                    class="cor-piao"
+                    data-cor="preto"
+                    aria-label="Pião preto"
+                    aria-pressed="false"
+                    title="Preto"
+                >
+                    <span
+                        class="piao-icone"
+                        style="color: #202020;"
+                        aria-hidden="true"
+                    >♟</span>
+
+                    <span>Preto</span>
+                </button>
+
+                <!-- BRANCO -->
+                <button
+                    type="button"
+                    class="cor-piao"
+                    data-cor="branco"
+                    aria-label="Pião branco"
+                    aria-pressed="false"
+                    title="Branco"
+                >
+                    <span
+                        class="piao-icone piao-branco"
+                        style="color: #ffffff; -webkit-text-stroke: 1px #666666;"
+                        aria-hidden="true"
+                    >♟</span>
+
+                    <span>Branco</span>
+                </button>
+
+                <!-- VERDE -->
+                <button
+                    type="button"
+                    class="cor-piao"
+                    data-cor="verde"
+                    aria-label="Pião verde"
+                    aria-pressed="false"
+                    title="Verde"
+                >
+                    <span
+                        class="piao-icone"
+                        style="color: #008c58;"
+                        aria-hidden="true"
+                    >♟</span>
+
+                    <span>Verde</span>
+                </button>
+
+                <!-- AZUL -->
+                <button
+                    type="button"
+                    class="cor-piao"
+                    data-cor="azul"
+                    aria-label="Pião azul"
+                    aria-pressed="false"
+                    title="Azul"
+                >
+                    <span
+                        class="piao-icone"
+                        style="color: #08759c;"
+                        aria-hidden="true"
+                    >♟</span>
+
+                    <span>Azul</span>
+                </button>
+
+                <!-- VERMELHO -->
+                <button
+                    type="button"
+                    class="cor-piao"
+                    data-cor="vermelho"
+                    aria-label="Pião vermelho"
+                    aria-pressed="false"
+                    title="Vermelho"
+                >
+                    <span
+                        class="piao-icone"
+                        style="color: #d92320;"
+                        aria-hidden="true"
+                    >♟</span>
+
+                    <span>Vermelho</span>
+                </button>
+
+            </div>
+
+            <p
+                id="mensagemPiao"
+                aria-live="polite"
+            >
+                Selecione uma cor disponível.
+            </p>
+
+        </div>
+
         <button id="btnAdicionar" type="button">
             ENTRAR COMO JOGADOR
         </button>
 
+        <!-- LISTA DE JOGADORES -->
         <div id="listaJogadores"></div>
 
     </section>
@@ -108,11 +250,13 @@
             MOVIMENTAR DINHEIRO
         </div>
 
+        <!-- TIPO DE OPERAÇÃO -->
         <label for="tipoOperacao">
             Escolha a operação
         </label>
 
         <select id="tipoOperacao">
+
             <option value="receber">
                 Receber do banco
             </option>
@@ -124,6 +268,7 @@
             <option value="transferir">
                 Transferir para jogador
             </option>
+
         </select>
 
         <!-- DESTINATÁRIO -->
@@ -137,38 +282,179 @@
             </label>
 
             <select id="jogadorDestino">
+
                 <option value="">
                     Selecione um jogador
                 </option>
+
             </select>
 
         </div>
 
-        <!-- VALOR -->
+        <!-- VALORES RÁPIDOS -->
+        <label>
+            Valores rápidos
+        </label>
+
+        <div class="valores-rapidos">
+
+            <button
+                type="button"
+                class="btn-valor"
+                data-valor="10"
+            >
+                R$ 10
+            </button>
+
+            <button
+                type="button"
+                class="btn-valor"
+                data-valor="50"
+            >
+                R$ 50
+            </button>
+
+            <button
+                type="button"
+                class="btn-valor"
+                data-valor="100"
+            >
+                R$ 100
+            </button>
+
+            <button
+                type="button"
+                class="btn-valor"
+                data-valor="200"
+            >
+                R$ 200
+            </button>
+
+            <button
+                type="button"
+                class="btn-valor"
+                data-valor="500"
+            >
+                R$ 500
+            </button>
+
+            <button
+                type="button"
+                class="btn-valor"
+                data-valor="1000"
+            >
+                R$ 1.000
+            </button>
+
+            <button
+                type="button"
+                class="btn-valor"
+                data-valor="2000"
+            >
+                R$ 2.000
+            </button>
+
+            <button
+                type="button"
+                class="btn-valor"
+                data-valor="5000"
+            >
+                R$ 5.000
+            </button>
+
+            <button
+                type="button"
+                class="btn-valor"
+                data-valor="10000"
+            >
+                R$ 10.000
+            </button>
+
+        </div>
+
+        <!-- VALOR PERSONALIZADO -->
         <label for="valorOperacao">
-            Valor (R$)
+            Valor da operação (R$)
         </label>
 
         <input
             type="number"
             id="valorOperacao"
-            placeholder="Digite o valor"
+            placeholder="Selecione ou digite um valor"
             min="0.01"
             step="0.01"
         >
 
-        <!-- MOTIVO -->
+        <!-- MOTIVOS RÁPIDOS -->
+        <label>
+            Motivos rápidos
+        </label>
+
+        <div class="motivos-rapidos">
+
+            <button
+                type="button"
+                class="btn-motivo"
+                data-motivo="Aluguel"
+            >
+                Aluguel
+            </button>
+
+            <button
+                type="button"
+                class="btn-motivo"
+                data-motivo="Imposto"
+            >
+                Imposto
+            </button>
+
+            <button
+                type="button"
+                class="btn-motivo"
+                data-motivo="Compra de propriedade"
+            >
+                Compra de propriedade
+            </button>
+
+            <button
+                type="button"
+                class="btn-motivo"
+                data-motivo="Prêmio"
+            >
+                Prêmio
+            </button>
+
+            <button
+                type="button"
+                class="btn-motivo"
+                data-motivo="Passou pelo início"
+            >
+                Passou pelo início
+            </button>
+
+            <button
+                type="button"
+                class="btn-motivo"
+                data-motivo=""
+            >
+                Outro motivo
+            </button>
+
+        </div>
+
+        <!-- MOTIVO PERSONALIZADO -->
         <label for="motivoOperacao">
-            Motivo (opcional)
+            Motivo da operação (opcional)
         </label>
 
         <input
             type="text"
             id="motivoOperacao"
-            placeholder="Ex.: aluguel, prêmio, imposto"
+            placeholder="Selecione ou digite um motivo"
             maxlength="100"
         >
 
+        <!-- CONFIRMAR -->
         <button
             id="btnConfirmarOperacao"
             type="button"

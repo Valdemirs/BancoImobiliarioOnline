@@ -1,5 +1,8 @@
 
-/* CONFIGURAÇÕES GERAIS */
+/* =========================================
+   BANCO IMOBILIÁRIO ONLINE
+   TEMA CLARO - MAQUININHA DIGITAL
+========================================= */
 
 :root {
     --azul: #15365b;
@@ -7,10 +10,12 @@
     --verde: #16804a;
     --verde-escuro: #116639;
     --vermelho: #dc3545;
-    --fundo: #eef2f7;
+    --fundo: #eef3f9;
+    --branco: #ffffff;
     --texto: #1d2939;
     --cinza: #667085;
-    --borda: #e4e9f1;
+    --borda: #e2e8f0;
+    --sombra: 0 10px 30px rgba(21, 54, 91, 0.07);
 }
 
 * {
@@ -20,17 +25,13 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(
-        145deg,
-        #e8eff8,
-        #f7f9fc
-    );
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--fundo);
     color: var(--texto);
     min-height: 100vh;
 }
 
-/* CONTAINER PRINCIPAL */
+/* CONTAINER */
 
 .container {
     width: 100%;
@@ -38,105 +39,133 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 35px 20px;
+    padding: 24px 16px 40px;
 }
 
 /* CABEÇALHO */
 
 .topo {
     width: 100%;
+    max-width: 520px;
+    padding: 28px 20px;
+    margin-bottom: 22px;
+    border-radius: 20px;
+    background: linear-gradient(
+        135deg,
+        #15365b,
+        #24558a
+    );
+    color: white;
     text-align: center;
-    margin-bottom: 30px;
+    box-shadow: var(--sombra);
 }
 
 .topo h1 {
-    color: var(--azul);
-    font-size: 32px;
-    letter-spacing: 2px;
+    color: white;
+    font-size: 28px;
     font-weight: 800;
+    letter-spacing: 2px;
 }
 
 .topo p {
-    color: var(--cinza);
-    margin-top: 10px;
-    font-size: 15px;
+    color: #dce9f7;
+    font-size: 14px;
+    margin-top: 8px;
 }
 
 /* CARTÕES */
 
 .card {
-    background: #ffffff;
     width: 100%;
-    max-width: 460px;
-    padding: 30px;
-    border-radius: 18px;
-    box-shadow: 0 8px 30px rgba(21, 54, 91, 0.08);
-    text-align: center;
+    max-width: 520px;
+    background: var(--branco);
+    padding: 28px;
+    border-radius: 20px;
     border: 1px solid var(--borda);
+    box-shadow: var(--sombra);
+    text-align: center;
 }
 
 .card h2 {
     color: var(--azul);
+    font-size: 22px;
     margin-bottom: 16px;
-    font-size: 23px;
+}
+
+.card h3 {
+    color: var(--azul);
 }
 
 .card p {
     color: var(--cinza);
-    line-height: 1.5;
-    margin-bottom: 18px;
+    line-height: 1.6;
+    margin-bottom: 16px;
 }
 
 /* BOTÕES */
 
 button {
+    display: block;
     width: 100%;
-    padding: 16px;
+    padding: 15px;
+    margin-top: 12px;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--azul);
     color: white;
     font-size: 15px;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
-    margin-top: 12px;
-    transition: background 0.2s, transform 0.2s;
+    transition:
+        background 0.2s,
+        transform 0.2s,
+        box-shadow 0.2s;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     background: var(--azul-claro);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(21, 54, 91, 0.15);
 }
 
-button:active {
+button:active:not(:disabled) {
     transform: translateY(0);
 }
 
 button:disabled {
-    opacity: 0.6;
+    opacity: 0.55;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
+}
+
+button:focus-visible {
+    outline: 3px solid #60a5fa;
+    outline-offset: 3px;
 }
 
 /* CAMPOS */
 
 input,
 select {
+    display: block;
     width: 100%;
     padding: 15px;
     border: 1px solid #d0d5dd;
-    border-radius: 10px;
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--texto);
     font-size: 15px;
     outline: none;
-    background: white;
-    color: var(--texto);
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
 }
 
 input:focus,
 select:focus {
     border-color: var(--azul-claro);
-    box-shadow: 0 0 0 3px rgba(36, 85, 138, 0.1);
+    box-shadow: 0 0 0 3px rgba(36, 85, 138, 0.12);
 }
 
 input:disabled,
@@ -148,74 +177,276 @@ select:disabled {
 label {
     display: block;
     text-align: left;
-    font-size: 14px;
-    font-weight: bold;
     color: #344054;
+    font-size: 14px;
+    font-weight: 700;
     margin-top: 18px;
     margin-bottom: 8px;
 }
 
-/* SEPARADOR */
+/* SEPARADORES */
 
 .separador {
     margin: 24px 0;
-    color: #98a2b3;
-    font-size: 13px;
+    color: #8290a3;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+/* TELA INICIAL */
+
+#areaInicial {
+    padding-top: 34px;
+    padding-bottom: 34px;
+}
+
+#areaInicial h2 {
+    font-size: 24px;
+}
+
+#btnCriar {
+    background: var(--verde);
+}
+
+#btnCriar:hover:not(:disabled) {
+    background: var(--verde-escuro);
+}
+
+#codigoSala {
+    text-align: center;
     font-weight: bold;
     letter-spacing: 1px;
 }
 
-/* CÓDIGO DA PARTIDA */
+/* ÁREA DOS JOGADORES */
 
 #codigoExibido {
-    background: #e8f0fa;
+    background: #edf4fc;
     color: var(--azul);
-    padding: 16px;
-    border-radius: 10px;
-    font-weight: bold;
-    margin: 20px 0;
-    overflow-wrap: anywhere;
     border: 1px dashed #a6bfdc;
+    padding: 18px;
+    border-radius: 12px;
+    font-weight: 800;
+    margin: 18px 0;
+    overflow-wrap: anywhere;
 }
 
-/* LISTA DE JOGADORES */
+#btnCompartilhar {
+    background: #e8f0fa;
+    color: var(--azul);
+    border: 1px solid #c5d8ef;
+}
+
+#btnCompartilhar:hover:not(:disabled) {
+    background: #d9e8f8;
+}
 
 #listaJogadores {
-    margin-top: 20px;
+    margin-top: 22px;
     text-align: left;
 }
 
 #listaJogadores p {
-    background: #f1f5fa;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    background: #f5f8fc;
     color: var(--azul);
-    font-weight: bold;
     border: 1px solid #e3eaf3;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    overflow-wrap: anywhere;
 }
 
-/* ÁREA DO BANCO */
+/* =========================================
+   ESCOLHA DOS PIÕES
+========================================= */
+
+#areaEscolhaPiao {
+    margin-top: 22px;
+    padding: 18px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+}
+
+#tituloEscolhaPiao {
+    margin-top: 0;
+    margin-bottom: 8px;
+    text-align: center;
+    font-size: 16px;
+    color: var(--azul);
+}
+
+#areaEscolhaPiao > p {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+/* Grade com seis piões */
+
+.cores-pioes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+}
+
+/* Cartão individual */
+
+.cor-piao {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 112px;
+
+    margin: 0;
+    padding: 12px 5px;
+
+    background: #ffffff;
+    color: #344054;
+
+    border: 2px solid #dce5ef;
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s,
+        border-color 0.2s,
+        transform 0.2s,
+        box-shadow 0.2s;
+}
+
+.cor-piao > span:last-child {
+    font-size: 12px;
+    font-weight: 700;
+    color: #344054;
+    overflow-wrap: anywhere;
+}
+
+/* Formato do pião */
+
+.piao-icone {
+    display: block;
+    font-family: "Segoe UI Symbol", Arial, sans-serif;
+    font-size: 48px;
+    font-weight: normal;
+    line-height: 1;
+    text-align: center;
+    filter: drop-shadow(1px 3px 2px rgba(0, 0, 0, 0.15));
+}
+
+/* Contorno do pião branco */
+
+.piao-branco {
+    -webkit-text-stroke: 1px #666666;
+    text-shadow:
+        1px 0 #666666,
+        -1px 0 #666666,
+        0 1px #666666,
+        0 -1px #666666;
+}
+
+/* Efeito ao passar o mouse */
+
+.cor-piao:hover:not(:disabled) {
+    background: #edf8f1;
+    border-color: #8cc9a5;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 14px rgba(22, 128, 74, 0.12);
+}
+
+/* Pião selecionado */
+
+.cor-piao.ativo,
+.cor-piao.selecionada,
+.cor-piao[aria-pressed="true"] {
+    background: #eaf7ef;
+    border-color: var(--verde);
+    box-shadow: 0 0 0 2px rgba(22, 128, 74, 0.12);
+}
+
+/* Pião ocupado */
+
+.cor-piao.ocupado,
+.cor-piao:disabled {
+    background: #f2f4f7;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.cor-piao.ocupado > span:last-child {
+    color: #98a2b3;
+}
+
+/* Mensagem abaixo dos piões */
+
+#mensagemPiao {
+    margin: 10px 0 0;
+    padding: 10px;
+    border-radius: 10px;
+    background: #edf4fc;
+    color: var(--azul);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Botão de cadastro */
+
+#btnAdicionar {
+    background: var(--verde);
+    margin-top: 18px;
+}
+
+#btnAdicionar:hover:not(:disabled) {
+    background: var(--verde-escuro);
+}
+
+/* =========================================
+   MAQUININHA DIGITAL
+========================================= */
 
 #areaBanco {
     border-top: 5px solid var(--azul);
 }
 
 #meuNome {
-    font-size: 17px;
-    font-weight: bold;
-    color: #344054;
+    color: var(--azul);
+    font-size: 19px;
+    font-weight: 800;
+    margin-bottom: 12px;
 }
 
 #meuSaldo {
-    font-size: 36px;
+    display: block;
+    background: #edf8f1;
+    border: 1px solid #d2ebda;
+    border-radius: 16px;
+    padding: 22px 10px;
+    margin: 12px 0 26px;
     color: var(--verde);
-    margin: 15px 0 25px;
+    font-size: 34px;
+    font-weight: 800;
     overflow-wrap: anywhere;
 }
 
+/* OPERAÇÕES */
+
 #tipoOperacao {
     cursor: pointer;
+    font-weight: 600;
 }
 
 #areaDestinatario {
@@ -223,20 +454,79 @@ label {
 }
 
 #valorOperacao {
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--azul);
 }
+
+#motivoOperacao {
+    font-size: 15px;
+}
+
+/* CONFIRMAR OPERAÇÃO */
 
 #btnConfirmarOperacao {
     background: var(--verde);
     margin-top: 25px;
+    padding: 18px;
+    font-size: 16px;
 }
 
-#btnConfirmarOperacao:hover {
+#btnConfirmarOperacao:hover:not(:disabled) {
     background: var(--verde-escuro);
 }
 
-/* EXTRATO */
+/* VALORES RÁPIDOS */
+
+.valores-rapidos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.valores-rapidos button {
+    margin-top: 0;
+    padding: 13px 5px;
+    background: #f3f7fc;
+    color: var(--azul);
+    border: 1px solid #d6e2f0;
+    font-size: 13px;
+}
+
+.valores-rapidos button:hover:not(:disabled),
+.valores-rapidos button.ativo {
+    background: var(--azul);
+    color: white;
+}
+
+/* MOTIVOS RÁPIDOS */
+
+.motivos-rapidos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.motivos-rapidos button {
+    margin-top: 0;
+    padding: 12px 8px;
+    background: #f3f7fc;
+    color: var(--azul);
+    border: 1px solid #d6e2f0;
+    font-size: 13px;
+}
+
+.motivos-rapidos button:hover:not(:disabled),
+.motivos-rapidos button.ativo {
+    background: var(--azul);
+    color: white;
+}
+
+/* =========================================
+   EXTRATO
+========================================= */
 
 #areaExtrato {
     text-align: left;
@@ -271,8 +561,8 @@ label {
     background: transparent;
     padding: 0;
     margin: 8px 0;
-    font-size: 14px;
     color: #344054;
+    font-size: 14px;
 }
 
 #listaExtrato small {
@@ -282,7 +572,19 @@ label {
     margin-top: 8px;
 }
 
-/* CONTROLE DA PARTIDA */
+#btnImprimirExtrato {
+    background: #e8f0fa;
+    color: var(--azul);
+    border: 1px solid #c5d8ef;
+}
+
+#btnImprimirExtrato:hover:not(:disabled) {
+    background: #d9e8f8;
+}
+
+/* =========================================
+   FINALIZAR PARTIDA
+========================================= */
 
 #areaFinalizar {
     border-top: 5px solid var(--vermelho);
@@ -301,11 +603,13 @@ label {
     margin-top: 18px;
 }
 
-#btnFinalizar:hover {
+#btnFinalizar:hover:not(:disabled) {
     background: #b52b39 !important;
 }
 
-/* RESULTADO FINAL */
+/* =========================================
+   RESULTADO FINAL
+========================================= */
 
 #areaResultado {
     border-top: 5px solid #e5b94b;
@@ -313,14 +617,14 @@ label {
 
 #tituloVencedor {
     color: var(--azul);
-    margin: 18px 0;
     font-size: 20px;
+    margin: 18px 0;
 }
 
 #nomeVencedor {
+    color: var(--azul);
     font-size: 25px;
     font-weight: bold;
-    color: var(--azul);
     overflow-wrap: anywhere;
 }
 
@@ -340,6 +644,9 @@ label {
     border-radius: 10px;
     margin-bottom: 8px;
     color: var(--texto);
+    display: flex;
+    align-items: center;
+    padding: 12px;
 }
 
 /* RODAPÉ */
@@ -351,24 +658,32 @@ footer {
     text-align: center;
 }
 
-/* RESPONSIVIDADE */
+/* =========================================
+   RESPONSIVIDADE
+========================================= */
 
 @media (max-width: 480px) {
+
     .container {
-        padding: 20px 12px;
+        padding: 14px 10px 30px;
     }
 
-    .card {
-        padding: 24px 18px;
-        border-radius: 15px;
+    .topo {
+        padding: 24px 14px;
+        border-radius: 16px;
     }
 
     .topo h1 {
-        font-size: 26px;
+        font-size: 24px;
+    }
+
+    .card {
+        padding: 22px 16px;
+        border-radius: 16px;
     }
 
     #meuSaldo {
-        font-size: 30px;
+        font-size: 29px;
     }
 
     #saldoVencedor {
@@ -378,11 +693,56 @@ footer {
     button {
         font-size: 14px;
     }
+
+    .valores-rapidos {
+        gap: 7px;
+    }
+
+    .valores-rapidos button {
+        font-size: 12px;
+        padding: 12px 3px;
+    }
+
+    .motivos-rapidos {
+        gap: 7px;
+    }
+
+    .motivos-rapidos button {
+        font-size: 12px;
+    }
+
+    /* Piões em celulares */
+
+    .cores-pioes {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 9px;
+    }
+
+    .cor-piao {
+        min-height: 96px;
+        padding: 10px 4px;
+        border-radius: 12px;
+    }
+
+    .piao-icone {
+        font-size: 40px;
+    }
+
+    .cor-piao > span:last-child {
+        font-size: 11px;
+    }
+
+    #areaEscolhaPiao {
+        padding: 15px 10px;
+    }
 }
 
-/* IMPRESSÃO */
+/* =========================================
+   IMPRESSÃO DO EXTRATO
+========================================= */
 
 @media print {
+
     body {
         background: white;
     }

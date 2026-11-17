@@ -12,7 +12,9 @@ import {
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
+// ==========================================
 // ELEMENTOS DA TELA
+// ==========================================
 
 const btnCriar = document.getElementById("btnCriar");
 const btnEntrar = document.getElementById("btnEntrar");
@@ -24,6 +26,10 @@ const nomeJogador = document.getElementById("nomeJogador");
 const btnAdicionar = document.getElementById("btnAdicionar");
 const listaJogadores = document.getElementById("listaJogadores");
 
+const areaEscolhaPiao = document.getElementById("areaEscolhaPiao");
+const mensagemPiao = document.getElementById("mensagemPiao");
+const botoesPioes = document.querySelectorAll(".cor-piao");
+
 const areaBanco = document.getElementById("areaBanco");
 const areaExtrato = document.getElementById("areaExtrato");
 const meuNome = document.getElementById("meuNome");
@@ -34,12 +40,13 @@ const areaDestinatario = document.getElementById("areaDestinatario");
 const jogadorDestino = document.getElementById("jogadorDestino");
 const valorOperacao = document.getElementById("valorOperacao");
 const motivoOperacao = document.getElementById("motivoOperacao");
-const btnConfirmarOperacao =
-    document.getElementById("btnConfirmarOperacao");
+const btnConfirmarOperacao = document.getElementById("btnConfirmarOperacao");
+
+const botoesValores = document.querySelectorAll(".btn-valor");
+const botoesMotivos = document.querySelectorAll(".btn-motivo");
 
 const listaExtrato = document.getElementById("listaExtrato");
-const btnImprimirExtrato =
-    document.getElementById("btnImprimirExtrato");
+const btnImprimirExtrato = document.getElementById("btnImprimirExtrato");
 
 const areaFinalizar = document.getElementById("areaFinalizar");
 const statusPartida = document.getElementById("statusPartida");
@@ -51,21 +58,40 @@ const nomeVencedor = document.getElementById("nomeVencedor");
 const saldoVencedor = document.getElementById("saldoVencedor");
 const rankingFinal = document.getElementById("rankingFinal");
 
+const btnCompartilhar = document.getElementById("btnCompartilhar");
+
+// ==========================================
 // VARIÁVEIS
+// ==========================================
 
 let codigoAtual = "";
 let jogadores = [];
 let transacoes = [];
 let meuJogador = null;
 let partidaAtual = null;
+let corSelecionada = "";
 
 let pararEscutaJogadores = null;
 let pararEscutaExtrato = null;
 let pararEscutaPartida = null;
+let pararEscutaPioes = null;
+
+let coresReservadas = new Set();
 
 const LIMITE_CENTAVOS = 100000000000;
 
+const CORES_PIOES = {
+    amarelo: "#f0c400",
+    preto: "#202020",
+    branco: "#ffffff",
+    verde: "#008c58",
+    azul: "#08759c",
+    vermelho: "#d92320"
+};
+
+// ==========================================
 // FUNÇÕES AUXILIARES
+// ==========================================
 
 function formatarDinheiro(valor) {
     return Number(valor).toLocaleString("pt-BR", {
@@ -108,17 +134,15 @@ function referenciaPartida(codigo = codigoAtual) {
 }
 
 function referenciaJogador(uid) {
-    return doc(
-        db, "partidas", codigoAtual,
-        "jogadores", uid
-    );
+    return doc(db, "partidas", codigoAtual, "jogadores", uid);
+}
+
+function referenciaPiao(cor) {
+    return doc(db, "partidas", codigoAtual, "pioes", cor);
 }
 
 function obterNomeJogador(uid) {
-    const jogador = jogadores.find(function(item) {
-        return item.uid === uid;
-    });
-
+    const jogador = jogadores.find(item => item.uid === uid);
     return jogador ? jogador.nome : "Jogador desconhecido";
 }
 
@@ -133,7 +157,9 @@ function mostrarErro(erro, mensagem) {
         JA_CADASTRADO: "Você já está cadastrado.",
         MESMO_JOGADOR: "Você não pode transferir para si mesmo.",
         SEM_JOGADORES: "Cadastre pelo menos um jogador antes de finalizar.",
-        NAO_CRIADOR: "Somente o criador pode finalizar a partida."
+        NAO_CRIADOR: "Somente o criador pode finalizar a partida.",
+        PIAO_OCUPADO: "Este pião já foi escolhido. Selecione outra cor.",
+        PIAO_INVALIDO: "Escolha uma cor de pião válida."
     };
 
     if (mensagens[erro.message]) {
@@ -141,14 +167,223 @@ function mostrarErro(erro, mensagem) {
     } else if (erro.code === "permission-denied") {
         alert(
             "Operação bloqueada pelo Firebase. " +
-            "Confira as regras ou o status da partida."
+            "Confira as regras de segurança da partida."
         );
     } else {
         alert(mensagem);
     }
 }
 
+// ==========================================
+// ESCOLHA DOS PIÕES
+// ==========================================
+
+function criarIconePiao(cor) {
+    const icone = document.createElement("span");
+
+    icone.textContent = "♟";
+    icone.setAttribute("aria-hidden", "true");
+    icone.style.color = CORES_PIOES[cor] || "#9ca3af";
+    icone.style.fontSize = "28px";
+    icone.style.lineHeight = "1";
+    icone.style.display = "inline-block";
+    icone.style.marginRight = "8px";
+
+    if (cor === "branco") {
+        icone.style.webkitTextStroke = "1px #666666";
+        icone.style.textShadow = "0 0 1px #666666";
+    }
+
+    return icone;
+}
+
+function atualizarSelecaoPioes() {
+    const podeEscolher =
+        partidaAberta() && !meuJogador;
+
+    botoesPioes.forEach(function(botao) {
+        const cor = botao.dataset.cor;
+        const ocupada = coresReservadas.has(cor);
+        const selecionada = corSelecionada === cor;
+
+        botao.disabled = !podeEscolher || ocupada;
+        botao.classList.toggle("ativo", selecionada);
+        botao.classList.toggle("ocupado", ocupada);
+        botao.setAttribute("aria-pressed", String(selecionada));
+
+        botao.style.opacity = ocupada ? "0.35" : "1";
+        botao.style.cursor = botao.disabled
+            ? "not-allowed"
+            : "pointer";
+
+        botao.style.outline = selecionada
+            ? "3px solid #16a34a"
+            : "";
+
+        botao.style.outlineOffset = selecionada
+            ? "2px"
+            : "";
+
+        botao.title = ocupada
+            ? cor + " — ocupado"
+            : cor + " — disponível";
+    });
+
+    if (areaEscolhaPiao) {
+        areaEscolhaPiao.style.display =
+            podeEscolher ? "block" : "none";
+    }
+
+    if (!mensagemPiao) return;
+
+    if (corSelecionada) {
+        mensagemPiao.textContent =
+            "Pião selecionado: " + corSelecionada + ".";
+    } else if (coresReservadas.size >= 6) {
+        mensagemPiao.textContent =
+            "Todos os seis piões estão ocupados.";
+    } else {
+        mensagemPiao.textContent =
+            "Selecione uma cor disponível.";
+    }
+}
+
+botoesPioes.forEach(function(botao) {
+    botao.addEventListener("click", function() {
+        const cor = botao.dataset.cor;
+
+        if (
+            !partidaAberta() ||
+            meuJogador ||
+            !Object.hasOwn(CORES_PIOES, cor) ||
+            coresReservadas.has(cor)
+        ) {
+            return;
+        }
+
+        corSelecionada = cor;
+        atualizarSelecaoPioes();
+    });
+});
+
+function acompanharPioes(codigo) {
+    if (pararEscutaPioes) {
+        pararEscutaPioes();
+    }
+
+    coresReservadas = new Set();
+    atualizarSelecaoPioes();
+
+    const referencia = collection(
+        db, "partidas", codigo, "pioes"
+    );
+
+    pararEscutaPioes = onSnapshot(
+        referencia,
+        function(resultado) {
+            if (codigo !== codigoAtual) return;
+
+            coresReservadas = new Set(
+                resultado.docs.map(item => item.id)
+            );
+
+            if (coresReservadas.has(corSelecionada)) {
+                corSelecionada = "";
+            }
+
+            atualizarSelecaoPioes();
+        },
+        function(erro) {
+            console.error("Erro ao carregar piões:", erro);
+            if (mensagemPiao) {
+                mensagemPiao.textContent =
+                    "Não foi possível carregar as cores disponíveis.";
+            }
+        }
+    );
+}
+
+// ==========================================
+// VALORES E MOTIVOS RÁPIDOS
+// ==========================================
+
+function atualizarDestaqueValores() {
+    botoesValores.forEach(function(botao) {
+        const selecionado =
+            valorOperacao.value !== "" &&
+            Number(botao.dataset.valor) ===
+            Number(valorOperacao.value);
+
+        botao.classList.toggle("ativo", selecionado);
+    });
+}
+
+function atualizarDestaqueMotivos() {
+    botoesMotivos.forEach(function(botao) {
+        const selecionado =
+            botao.dataset.motivo !== "" &&
+            botao.dataset.motivo === motivoOperacao.value;
+
+        botao.classList.toggle("ativo", selecionado);
+    });
+}
+
+function limparDestaquesRapidos() {
+    botoesValores.forEach(botao => {
+        botao.classList.remove("ativo");
+    });
+
+    botoesMotivos.forEach(botao => {
+        botao.classList.remove("ativo");
+    });
+}
+
+function atualizarBotoesRapidos() {
+    const desabilitar =
+        !partidaAberta() || !meuJogador;
+
+    botoesValores.forEach(botao => {
+        botao.disabled = desabilitar;
+    });
+
+    botoesMotivos.forEach(botao => {
+        botao.disabled = desabilitar;
+    });
+}
+
+botoesValores.forEach(function(botao) {
+    botao.addEventListener("click", function() {
+        if (!partidaAberta() || !meuJogador) return;
+
+        valorOperacao.value = botao.dataset.valor;
+        atualizarDestaqueValores();
+    });
+});
+
+botoesMotivos.forEach(function(botao) {
+    botao.addEventListener("click", function() {
+        if (!partidaAberta() || !meuJogador) return;
+
+        motivoOperacao.value = botao.dataset.motivo;
+        atualizarDestaqueMotivos();
+
+        if (botao.dataset.motivo === "") {
+            motivoOperacao.focus();
+        }
+    });
+});
+
+valorOperacao.addEventListener(
+    "input", atualizarDestaqueValores
+);
+
+motivoOperacao.addEventListener(
+    "input", atualizarDestaqueMotivos
+);
+
+// ==========================================
 // LISTA DE JOGADORES
+// ==========================================
 
 function atualizarJogadores() {
     listaJogadores.innerHTML = "";
@@ -156,31 +391,54 @@ function atualizarJogadores() {
     jogadores.forEach(function(jogador) {
         const item = document.createElement("p");
 
-        item.textContent =
+        if (jogador.corPiao) {
+            item.appendChild(
+                criarIconePiao(jogador.corPiao)
+            );
+        }
+
+        const texto = document.createElement("span");
+
+        texto.textContent =
             jogador.nome + " - " +
             formatarDinheiro(jogador.saldo);
 
+        item.appendChild(texto);
         listaJogadores.appendChild(item);
     });
 }
 
+// ==========================================
 // MINHA CONTA
+// ==========================================
 
 function atualizarMinhaConta() {
     const uid = auth.currentUser?.uid;
 
-    meuJogador = jogadores.find(function(jogador) {
-        return jogador.uid === uid;
-    }) || null;
+    meuJogador = jogadores.find(
+        jogador => jogador.uid === uid
+    ) || null;
 
     if (!meuJogador) {
         areaBanco.style.display = "none";
         areaExtrato.style.display = "none";
+
         atualizarEstadoPartida();
         return;
     }
 
-    meuNome.textContent = meuJogador.nome;
+    meuNome.textContent = "";
+
+    if (meuJogador.corPiao) {
+        meuNome.appendChild(
+            criarIconePiao(meuJogador.corPiao)
+        );
+    }
+
+    meuNome.appendChild(
+        document.createTextNode(meuJogador.nome)
+    );
+
     meuSaldo.textContent =
         formatarDinheiro(meuJogador.saldo);
 
@@ -191,7 +449,9 @@ function atualizarMinhaConta() {
     atualizarEstadoPartida();
 }
 
+// ==========================================
 // DESTINATÁRIOS
+// ==========================================
 
 function atualizarDestinatarios() {
     const selecionado = jogadorDestino.value;
@@ -211,16 +471,18 @@ function atualizarDestinatarios() {
 
         const opcao = document.createElement("option");
         opcao.value = jogador.uid;
-        opcao.textContent = jogador.nome;
+        opcao.textContent = jogador.corPiao
+            ? jogador.nome + " (" + jogador.corPiao + ")"
+            : jogador.nome;
 
         jogadorDestino.appendChild(opcao);
     });
 
     if (
-        jogadores.some(function(jogador) {
-            return jogador.uid === selecionado &&
-                jogador.uid !== auth.currentUser?.uid;
-        })
+        jogadores.some(jogador =>
+            jogador.uid === selecionado &&
+            jogador.uid !== auth.currentUser?.uid
+        )
     ) {
         jogadorDestino.value = selecionado;
     }
@@ -234,11 +496,12 @@ function atualizarTipoOperacao() {
 }
 
 tipoOperacao.addEventListener(
-    "change",
-    atualizarTipoOperacao
+    "change", atualizarTipoOperacao
 );
 
+// ==========================================
 // RESULTADO FINAL
+// ==========================================
 
 function mostrarResultado() {
     areaResultado.style.display = "none";
@@ -258,10 +521,9 @@ function mostrarResultado() {
             ? "Empate na primeira colocação!"
             : "Vencedor da partida!";
 
-    nomeVencedor.textContent =
-        vencedores.map(function(item) {
-            return item.nome;
-        }).join(" e ");
+    nomeVencedor.textContent = vencedores
+        .map(item => item.nome)
+        .join(" e ");
 
     saldoVencedor.textContent =
         formatarDinheiro(ranking[0].saldo);
@@ -269,18 +531,29 @@ function mostrarResultado() {
     ranking.forEach(function(jogador, indice) {
         const linha = document.createElement("p");
 
-        linha.textContent =
+        if (jogador.corPiao) {
+            linha.appendChild(
+                criarIconePiao(jogador.corPiao)
+            );
+        }
+
+        const texto = document.createElement("span");
+
+        texto.textContent =
             (indice + 1) + "º - " +
             jogador.nome + " - " +
             formatarDinheiro(jogador.saldo);
 
+        linha.appendChild(texto);
+
         linha.style.padding = "10px";
-        linha.style.borderBottom = "1px solid #e5e7eb";
+        linha.style.borderBottom =
+            "1px solid #e5e7eb";
 
         if (
-            vencedores.some(function(vencedor) {
-                return vencedor.uid === jogador.uid;
-            })
+            vencedores.some(
+                vencedor => vencedor.uid === jogador.uid
+            )
         ) {
             linha.style.fontWeight = "bold";
             linha.style.color = "#16803c";
@@ -290,14 +563,17 @@ function mostrarResultado() {
     });
 }
 
+// ==========================================
 // CONTROLE DA PARTIDA
+// ==========================================
 
 function atualizarEstadoPartida() {
     const finalizada = partidaFinalizada();
     const aberta = partidaAberta();
 
     const souCriador =
-        partidaAtual?.criadorUid === auth.currentUser?.uid;
+        partidaAtual?.criadorUid ===
+        auth.currentUser?.uid;
 
     areaFinalizar.style.display =
         partidaAtual ? "block" : "none";
@@ -321,10 +597,14 @@ function atualizarEstadoPartida() {
     motivoOperacao.disabled = !aberta;
     btnConfirmarOperacao.disabled = !aberta;
 
+    atualizarBotoesRapidos();
+    atualizarSelecaoPioes();
     mostrarResultado();
 }
 
+// ==========================================
 // ACOMPANHAR PARTIDA
+// ==========================================
 
 function acompanharPartida(codigo) {
     if (pararEscutaPartida) {
@@ -353,7 +633,9 @@ function acompanharPartida(codigo) {
     );
 }
 
+// ==========================================
 // ACOMPANHAR JOGADORES
+// ==========================================
 
 function acompanharJogadores(codigo) {
     if (pararEscutaJogadores) {
@@ -376,18 +658,16 @@ function acompanharJogadores(codigo) {
         function(resultado) {
             if (codigo !== codigoAtual) return;
 
-            jogadores = resultado.docs.map(function(item) {
-                return item.data();
-            });
+            jogadores = resultado.docs.map(
+                item => item.data()
+            );
 
-            jogadores.sort(function(a, b) {
-                return a.nome.localeCompare(b.nome);
-            });
+            jogadores.sort(
+                (a, b) => a.nome.localeCompare(b.nome)
+            );
 
             atualizarJogadores();
             atualizarMinhaConta();
-
-            // Atualiza os nomes do extrato
             renderizarExtrato();
         },
 
@@ -398,19 +678,21 @@ function acompanharJogadores(codigo) {
     );
 }
 
+// ==========================================
 // EXTRATO COMPLETO
+// ==========================================
 
 function renderizarExtrato() {
     listaExtrato.innerHTML = "";
 
     const uid = auth.currentUser?.uid;
-
     if (!uid) return;
 
-    const minhasTransacoes = transacoes.filter(function(item) {
-        return item.usuarioUid === uid ||
-            item.destinatarioUid === uid;
-    });
+    const minhasTransacoes = transacoes.filter(
+        item =>
+            item.usuarioUid === uid ||
+            item.destinatarioUid === uid
+    );
 
     minhasTransacoes.sort(function(a, b) {
         const dataA = a.criadaEm?.toMillis?.() || 0;
@@ -459,18 +741,21 @@ function renderizarExtrato() {
         titulo.style.color =
             entrada ? "#16804a" : "#dc3545";
 
-        // NOMES DOS PARTICIPANTES
-
         if (item.tipo === "transferir") {
-            const origem = obterNomeJogador(item.usuarioUid);
-            const destino = obterNomeJogador(item.destinatarioUid);
+            const origem =
+                obterNomeJogador(item.usuarioUid);
+
+            const destino =
+                obterNomeJogador(item.destinatarioUid);
 
             participantes.textContent =
                 "De: " + origem + " → Para: " + destino;
+
         } else if (item.tipo === "receber") {
             participantes.textContent =
                 "De: Banco → Para: " +
                 obterNomeJogador(item.usuarioUid);
+
         } else {
             participantes.textContent =
                 "De: " +
@@ -497,7 +782,9 @@ function renderizarExtrato() {
     });
 }
 
-// ACOMPANHAR EXTRATO EM TEMPO REAL
+// ==========================================
+// ACOMPANHAR EXTRATO
+// ==========================================
 
 function acompanharExtrato(codigo) {
     if (pararEscutaExtrato) {
@@ -517,9 +804,9 @@ function acompanharExtrato(codigo) {
         function(resultado) {
             if (codigo !== codigoAtual) return;
 
-            transacoes = resultado.docs.map(function(item) {
-                return item.data();
-            });
+            transacoes = resultado.docs.map(
+                item => item.data()
+            );
 
             renderizarExtrato();
         },
@@ -532,29 +819,33 @@ function acompanharExtrato(codigo) {
     );
 }
 
+// ==========================================
 // IMPRIMIR EXTRATO
+// ==========================================
 
-if (btnImprimirExtrato) {
-    btnImprimirExtrato.addEventListener(
-        "click",
-        function() {
-            if (!meuJogador) {
-                alert(
-                    "Entre como jogador para imprimir seu extrato."
-                );
-                return;
-            }
-
-            window.print();
+btnImprimirExtrato.addEventListener(
+    "click",
+    function() {
+        if (!meuJogador) {
+            alert(
+                "Entre como jogador para imprimir seu extrato."
+            );
+            return;
         }
-    );
-}
 
+        window.print();
+    }
+);
+
+// ==========================================
 // ABRIR PARTIDA
+// ==========================================
 
 function mostrarPartida(codigo) {
     codigoAtual = codigo;
     partidaAtual = null;
+    corSelecionada = "";
+    coresReservadas = new Set();
 
     codigoExibido.textContent =
         "Código da partida: " + codigo;
@@ -565,139 +856,196 @@ function mostrarPartida(codigo) {
 
     acompanharPartida(codigo);
     acompanharJogadores(codigo);
+    acompanharPioes(codigo);
     acompanharExtrato(codigo);
 }
 
+// ==========================================
 // CRIAR PARTIDA
+// ==========================================
 
-btnCriar.addEventListener("click", async function() {
-    btnCriar.disabled = true;
+btnCriar.addEventListener(
+    "click",
+    async function() {
+        btnCriar.disabled = true;
 
-    try {
-        await autenticacaoPronta;
+        try {
+            await autenticacaoPronta;
 
-        const referencia = doc(
-            collection(db, "partidas")
-        );
+            const referencia = doc(
+                collection(db, "partidas")
+            );
 
-        await setDoc(referencia, {
-            codigo: referencia.id,
-            criadaEm: new Date(),
-            status: "aguardando",
-            criadorUid: auth.currentUser.uid
-        });
+            await setDoc(referencia, {
+                codigo: referencia.id,
+                criadaEm: new Date(),
+                status: "aguardando",
+                criadorUid: auth.currentUser.uid
+            });
 
-        mostrarPartida(referencia.id);
+            mostrarPartida(referencia.id);
 
-        alert("Partida criada com sucesso!");
+            alert("Partida criada com sucesso!");
 
-    } catch (erro) {
-        mostrarErro(erro, "Erro ao criar partida.");
-    } finally {
-        btnCriar.disabled = false;
+        } catch (erro) {
+            mostrarErro(erro, "Erro ao criar partida.");
+        } finally {
+            btnCriar.disabled = false;
+        }
     }
-});
+);
 
+// ==========================================
 // ENTRAR NA PARTIDA
+// ==========================================
 
-btnEntrar.addEventListener("click", async function() {
-    const codigo = campoCodigo.value.trim();
+btnEntrar.addEventListener(
+    "click",
+    async function() {
+        const codigo = campoCodigo.value.trim();
 
-    if (!codigo) {
-        alert("Digite o código da partida.");
-        return;
-    }
-
-    btnEntrar.disabled = true;
-
-    try {
-        await autenticacaoPronta;
-
-        const resultado = await getDoc(
-            referenciaPartida(codigo)
-        );
-
-        if (!resultado.exists()) {
-            alert("Partida não encontrada.");
+        if (!codigo) {
+            alert("Digite o código da partida.");
             return;
         }
 
-        mostrarPartida(codigo);
+        btnEntrar.disabled = true;
 
-        alert("Você entrou na partida!");
+        try {
+            await autenticacaoPronta;
 
-    } catch (erro) {
-        mostrarErro(erro, "Erro ao entrar na partida.");
-    } finally {
-        btnEntrar.disabled = false;
-    }
-});
+            const resultado = await getDoc(
+                referenciaPartida(codigo)
+            );
 
-// CADASTRAR JOGADOR
-
-btnAdicionar.addEventListener("click", async function() {
-    if (!codigoAtual) {
-        alert("Entre em uma partida primeiro.");
-        return;
-    }
-
-    if (!partidaAberta()) {
-        alert("Esta partida não aceita novos jogadores.");
-        return;
-    }
-
-    const nome = nomeJogador.value.trim();
-
-    if (!nome || nome.length > 40) {
-        alert("Digite um nome com até 40 caracteres.");
-        return;
-    }
-
-    btnAdicionar.disabled = true;
-
-    try {
-        await autenticacaoPronta;
-
-        const referencia = referenciaJogador(
-            auth.currentUser.uid
-        );
-
-        const partidaRef = referenciaPartida();
-
-        await runTransaction(db, async function(tx) {
-            const partidaDoc = await tx.get(partidaRef);
-            const existente = await tx.get(referencia);
-
-            if (
-                !partidaDoc.exists() ||
-                partidaDoc.data().status !== "aguardando"
-            ) {
-                throw new Error("PARTIDA_FINALIZADA");
+            if (!resultado.exists()) {
+                alert("Partida não encontrada.");
+                return;
             }
 
-            if (existente.exists()) {
-                throw new Error("JA_CADASTRADO");
-            }
+            mostrarPartida(codigo);
 
-            tx.set(referencia, {
-                uid: auth.currentUser.uid,
-                nome: nome,
-                saldo: 25000
-            });
-        });
+            alert("Você entrou na partida!");
 
-        nomeJogador.value = "";
-
-        alert("Jogador cadastrado com sucesso!");
-
-    } catch (erro) {
-        mostrarErro(erro, "Erro ao cadastrar jogador.");
-    } finally {
-        btnAdicionar.disabled = false;
+        } catch (erro) {
+            mostrarErro(erro, "Erro ao entrar na partida.");
+        } finally {
+            btnEntrar.disabled = false;
+        }
     }
-});
+);
 
+// ==========================================
+// CADASTRAR JOGADOR COM PIÃO EXCLUSIVO
+// ==========================================
+
+btnAdicionar.addEventListener(
+    "click",
+    async function() {
+        if (!codigoAtual) {
+            alert("Entre em uma partida primeiro.");
+            return;
+        }
+
+        if (!partidaAberta()) {
+            alert("Esta partida não aceita novos jogadores.");
+            return;
+        }
+
+        const nome = nomeJogador.value.trim();
+        const cor = corSelecionada;
+
+        if (!nome || nome.length > 40) {
+            alert("Digite um nome com até 40 caracteres.");
+            return;
+        }
+
+        if (!Object.hasOwn(CORES_PIOES, cor)) {
+            alert("Escolha a cor do seu pião.");
+            return;
+        }
+
+        if (coresReservadas.has(cor)) {
+            alert("Este pião já está ocupado.");
+            return;
+        }
+
+        btnAdicionar.disabled = true;
+
+        try {
+            await autenticacaoPronta;
+
+            const uid = auth.currentUser.uid;
+            const jogadorRef = referenciaJogador(uid);
+            const partidaRef = referenciaPartida();
+            const piaoRef = referenciaPiao(cor);
+
+            await runTransaction(
+                db,
+                async function(tx) {
+                    const partidaDoc =
+                        await tx.get(partidaRef);
+
+                    const jogadorDoc =
+                        await tx.get(jogadorRef);
+
+                    const piaoDoc =
+                        await tx.get(piaoRef);
+
+                    if (
+                        !partidaDoc.exists() ||
+                        partidaDoc.data().status !== "aguardando"
+                    ) {
+                        throw new Error("PARTIDA_FINALIZADA");
+                    }
+
+                    if (jogadorDoc.exists()) {
+                        throw new Error("JA_CADASTRADO");
+                    }
+
+                    if (piaoDoc.exists()) {
+                        throw new Error("PIAO_OCUPADO");
+                    }
+
+                    // Reserva a cor para este jogador.
+                    tx.set(piaoRef, {
+                        uid: uid,
+                        cor: cor
+                    });
+
+                    // Cria o jogador com seu pião.
+                    tx.set(jogadorRef, {
+                        uid: uid,
+                        nome: nome,
+                        saldo: 25000,
+                        corPiao: cor
+                    });
+                }
+            );
+
+            nomeJogador.value = "";
+            corSelecionada = "";
+            atualizarSelecaoPioes();
+
+            alert(
+                "Jogador cadastrado com sucesso! " +
+                "Seu pião é " + cor + "."
+            );
+
+        } catch (erro) {
+            mostrarErro(
+                erro,
+                "Erro ao cadastrar jogador."
+            );
+        } finally {
+            btnAdicionar.disabled = false;
+        }
+    }
+);
+
+// ==========================================
 // MOVIMENTAÇÕES FINANCEIRAS
+// ==========================================
 
 btnConfirmarOperacao.addEventListener(
     "click",
@@ -740,7 +1088,6 @@ btnConfirmarOperacao.addEventListener(
         }
 
         const valor = centavos / 100;
-
         btnConfirmarOperacao.disabled = true;
 
         try {
@@ -809,9 +1156,7 @@ btnConfirmarOperacao.addEventListener(
                             throw new Error("SALDO_INSUFICIENTE");
                         }
 
-                        if (
-                            novoSaldoDestino > LIMITE_CENTAVOS
-                        ) {
+                        if (novoSaldoDestino > LIMITE_CENTAVOS) {
                             throw new Error("LIMITE_SALDO");
                         }
 
@@ -892,6 +1237,7 @@ btnConfirmarOperacao.addEventListener(
 
             valorOperacao.value = "";
             motivoOperacao.value = "";
+            limparDestaquesRapidos();
 
             alert("Operação realizada com sucesso!");
 
@@ -907,138 +1253,138 @@ btnConfirmarOperacao.addEventListener(
     }
 );
 
+// ==========================================
 // FINALIZAR PARTIDA
+// ==========================================
 
-btnFinalizar.addEventListener("click", async function() {
-    if (!codigoAtual || !partidaAberta()) {
-        alert("Não há uma partida aberta para finalizar.");
-        return;
-    }
-
-    if (
-        partidaAtual.criadorUid !==
-        auth.currentUser?.uid
-    ) {
-        alert("Somente o criador pode finalizar.");
-        return;
-    }
-
-    const confirmar = confirm(
-        "Deseja realmente finalizar esta partida?\n\n" +
-        "O jogador com maior saldo será o vencedor.\n" +
-        "Depois disso, ninguém poderá movimentar dinheiro."
-    );
-
-    if (!confirmar) return;
-
-    btnFinalizar.disabled = true;
-
-    try {
-        await autenticacaoPronta;
-
-        const codigo = codigoAtual;
-        const partidaRef = referenciaPartida(codigo);
-
-        const jogadoresRef = collection(
-            db, "partidas", codigo, "jogadores"
-        );
-
-        const listaInicial = await getDocs(jogadoresRef);
-
-        if (listaInicial.empty) {
-            throw new Error("SEM_JOGADORES");
+btnFinalizar.addEventListener(
+    "click",
+    async function() {
+        if (!codigoAtual || !partidaAberta()) {
+            alert("Não há uma partida aberta para finalizar.");
+            return;
         }
 
-        await runTransaction(db, async function(tx) {
-            const partidaDoc = await tx.get(partidaRef);
+        if (
+            partidaAtual.criadorUid !==
+            auth.currentUser?.uid
+        ) {
+            alert("Somente o criador pode finalizar.");
+            return;
+        }
 
-            if (
-                !partidaDoc.exists() ||
-                partidaDoc.data().status !== "aguardando"
-            ) {
-                throw new Error("PARTIDA_FINALIZADA");
-            }
-
-            if (
-                partidaDoc.data().criadorUid !==
-                auth.currentUser.uid
-            ) {
-                throw new Error("NAO_CRIADOR");
-            }
-
-            const documentos = [];
-
-            for (const item of listaInicial.docs) {
-                const documento = await tx.get(item.ref);
-
-                if (!documento.exists()) {
-                    throw new Error("JOGADOR_INEXISTENTE");
-                }
-
-                documentos.push(documento);
-            }
-
-            const ranking = documentos.map(function(item) {
-                const dados = item.data();
-
-                return {
-                    uid: dados.uid,
-                    nome: dados.nome,
-                    saldo: dados.saldo
-                };
-            });
-
-            ranking.sort(function(a, b) {
-                const diferenca = b.saldo - a.saldo;
-
-                if (diferenca !== 0) return diferenca;
-
-                return a.nome.localeCompare(b.nome);
-            });
-
-            const maiorSaldo = ranking[0].saldo;
-
-            const vencedores = ranking.filter(function(item) {
-                return Math.round(item.saldo * 100) ===
-                    Math.round(maiorSaldo * 100);
-            });
-
-            tx.update(partidaRef, {
-                status: "finalizada",
-                finalizadaEm: serverTimestamp(),
-                vencedores: vencedores,
-                rankingFinal: ranking
-            });
-        });
-
-        alert("Partida finalizada com sucesso!");
-
-    } catch (erro) {
-        mostrarErro(
-            erro,
-            "Não foi possível finalizar a partida."
+        const confirmar = confirm(
+            "Deseja realmente finalizar esta partida?\n\n" +
+            "O jogador com maior saldo será o vencedor.\n" +
+            "Depois disso, ninguém poderá movimentar dinheiro."
         );
-    } finally {
-        btnFinalizar.disabled = false;
+
+        if (!confirmar) return;
+
+        btnFinalizar.disabled = true;
+
+        try {
+            await autenticacaoPronta;
+
+            const codigo = codigoAtual;
+            const partidaRef = referenciaPartida(codigo);
+
+            const jogadoresRef = collection(
+                db, "partidas", codigo, "jogadores"
+            );
+
+            const listaInicial = await getDocs(jogadoresRef);
+
+            if (listaInicial.empty) {
+                throw new Error("SEM_JOGADORES");
+            }
+
+            await runTransaction(
+                db,
+                async function(tx) {
+                    const partidaDoc =
+                        await tx.get(partidaRef);
+
+                    if (
+                        !partidaDoc.exists() ||
+                        partidaDoc.data().status !== "aguardando"
+                    ) {
+                        throw new Error("PARTIDA_FINALIZADA");
+                    }
+
+                    if (
+                        partidaDoc.data().criadorUid !==
+                        auth.currentUser.uid
+                    ) {
+                        throw new Error("NAO_CRIADOR");
+                    }
+
+                    const documentos = [];
+
+                    for (const item of listaInicial.docs) {
+                        const documento = await tx.get(item.ref);
+
+                        if (!documento.exists()) {
+                            throw new Error("JOGADOR_INEXISTENTE");
+                        }
+
+                        documentos.push(documento);
+                    }
+
+                    const ranking = documentos.map(function(item) {
+                        const dados = item.data();
+
+                        return {
+                            uid: dados.uid,
+                            nome: dados.nome,
+                            saldo: dados.saldo,
+                            ...(dados.corPiao
+                                ? { corPiao: dados.corPiao }
+                                : {})
+                        };
+                    });
+
+                    ranking.sort(function(a, b) {
+                        const diferenca = b.saldo - a.saldo;
+
+                        if (diferenca !== 0) return diferenca;
+
+                        return a.nome.localeCompare(b.nome);
+                    });
+
+                    const maiorSaldo = ranking[0].saldo;
+
+                    const vencedores = ranking.filter(function(item) {
+                        return Math.round(item.saldo * 100) ===
+                            Math.round(maiorSaldo * 100);
+                    });
+
+                    tx.update(partidaRef, {
+                        status: "finalizada",
+                        finalizadaEm: serverTimestamp(),
+                        vencedores: vencedores,
+                        rankingFinal: ranking
+                    });
+                }
+            );
+
+            alert("Partida finalizada com sucesso!");
+
+        } catch (erro) {
+            mostrarErro(
+                erro,
+                "Não foi possível finalizar a partida."
+            );
+        } finally {
+            btnFinalizar.disabled = false;
+        }
     }
-});
-
-// INICIAR INTERFACE
-
-listaExtrato.textContent =
-    "Nenhuma movimentação registrada.";
-
-atualizarTipoOperacao();
-
+);
 
 // ==========================================
 // COMPARTILHAR PARTIDA
 // ==========================================
 
-const btnCompartilhar =
-    document.getElementById("btnCompartilhar");
-
-// Criar link de convite
 function gerarLinkPartida() {
     const link = new URL(window.location.href);
 
@@ -1047,73 +1393,64 @@ function gerarLinkPartida() {
     return link.toString();
 }
 
-// Compartilhar com amigos
-btnCompartilhar.addEventListener("click", async function() {
-
-    if (!codigoAtual) {
-        alert("Crie ou entre em uma partida primeiro.");
-        return;
-    }
-
-    const link = gerarLinkPartida();
-
-    const mensagem =
-        "Venha jogar Banco Imobiliário Online comigo!\n\n" +
-        "Entre na minha partida pelo link:\n" +
-        link;
-
-    // Compartilhamento nativo do celular
-    if (navigator.share) {
-        try {
-            await navigator.share({
-                title: "Banco Imobiliário Online",
-                text: mensagem
-            });
-
+btnCompartilhar.addEventListener(
+    "click",
+    async function() {
+        if (!codigoAtual) {
+            alert("Crie ou entre em uma partida primeiro.");
             return;
-        } catch (erro) {
-            if (erro.name === "AbortError") {
-                return;
-            }
+        }
 
-            console.error("Erro ao compartilhar:", erro);
+        const link = gerarLinkPartida();
+
+        const mensagem =
+            "Venha jogar Banco Imobiliário Online comigo!\n\n" +
+            "Entre na minha partida pelo link:\n" +
+            link;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: "Banco Imobiliário Online",
+                    text: mensagem
+                });
+
+                return;
+
+            } catch (erro) {
+                if (erro.name === "AbortError") return;
+
+                console.error("Erro ao compartilhar:", erro);
+            }
+        }
+
+        try {
+            await navigator.clipboard.writeText(mensagem);
+
+            alert(
+                "Convite copiado!\n\n" +
+                "Agora cole no WhatsApp e envie aos seus amigos."
+            );
+
+        } catch (erro) {
+            window.prompt("Copie o link da partida:", link);
         }
     }
-
-    // Copiar o convite no computador
-    try {
-        await navigator.clipboard.writeText(mensagem);
-
-        alert(
-            "Convite copiado!\n\n" +
-            "Agora cole no WhatsApp e envie aos seus amigos."
-        );
-
-    } catch (erro) {
-        window.prompt(
-            "Copie o link da partida:",
-            link
-        );
-    }
-});
+);
 
 // ==========================================
 // ENTRAR NA PARTIDA PELO LINK
 // ==========================================
 
 async function verificarConvite() {
-
     const parametros = new URLSearchParams(
         window.location.search
     );
 
     const codigoConvite = parametros.get("sala");
 
-    if (!codigoConvite) {
-        return;
-    }
+    if (!codigoConvite) return;
 
-    // Mostrar o código no campo de entrada
     campoCodigo.value = codigoConvite;
 
     try {
@@ -1128,7 +1465,6 @@ async function verificarConvite() {
             return;
         }
 
-        // Abrir a partida automaticamente
         mostrarPartida(codigoConvite);
 
     } catch (erro) {
@@ -1139,6 +1475,14 @@ async function verificarConvite() {
     }
 }
 
-// Verificar convite ao carregar o site
-verificarConvite();
+// ==========================================
+// INICIAR INTERFACE
+// ==========================================
 
+listaExtrato.textContent =
+    "Nenhuma movimentação registrada.";
+
+atualizarTipoOperacao();
+atualizarBotoesRapidos();
+atualizarSelecaoPioes();
+verificarConvite();
