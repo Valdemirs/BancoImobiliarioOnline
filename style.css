@@ -775,3 +775,64 @@ footer {
         break-inside: avoid;
     }
 }
+
+
+/* ==========================================
+   CORREÇÃO DOS PIÕES NO CELULAR
+   ========================================== */
+
+.piao-icone {
+    font-family: Arial, "Segoe UI Symbol", sans-serif;
+    font-variant-emoji: text;
+    font-weight: normal;
+    line-height: 1;
+    display: inline-block;
+}
+
+/* Cores dos seis piões */
+
+.cor-piao[data-cor="amarelo"] .piao-icone {
+    color: #f0c400 !important;
+}
+
+.cor-piao[data-cor="preto"] .piao-icone {
+    color: #202020 !important;
+}
+
+.cor-piao[data-cor="branco"] .piao-icone {
+    color: #ffffff !important;
+    -webkit-text-stroke: 1px #555555;
+}
+
+.cor-piao[data-cor="verde"] .piao-icone {
+    color: #008c58 !important;
+}
+
+.cor-piao[data-cor="azul"] .piao-icone {
+    color: #08759c !important;
+}
+
+.cor-piao[data-cor="vermelho"] .piao-icone {
+    color: #d92320 !important;
+}
+
+/* Organização dos piões no celular */
+
+@media (max-width: 480px) {
+    .cores-pioes {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .cor-piao {
+        min-width: 0;
+        min-height: 100px;
+        padding: 10px 4px;
+    }
+
+    .piao-icone {
+        font-size: 40px;
+    }
+}
+
