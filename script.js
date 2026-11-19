@@ -181,7 +181,7 @@ function mostrarErro(erro, mensagem) {
 function criarIconePiao(cor) {
     const icone = document.createElement("span");
 
-    icone.textContent = "♟";
+    icone.textContent = "\u265F\uFE0E";
     icone.setAttribute("aria-hidden", "true");
     icone.style.color = CORES_PIOES[cor] || "#9ca3af";
     icone.style.fontSize = "28px";
@@ -1486,3 +1486,51 @@ atualizarTipoOperacao();
 atualizarBotoesRapidos();
 atualizarSelecaoPioes();
 verificarConvite();
+
+
+/* ==========================================
+   CORREÇÃO DOS PIÕES PARA CELULAR
+   ========================================== */
+
+function corrigirPioesCelular() {
+    const cores = {
+        amarelo: "#f0c400",
+        preto: "#202020",
+        branco: "#ffffff",
+        verde: "#008c58",
+        azul: "#08759c",
+        vermelho: "#d92320"
+    };
+
+    document.querySelectorAll(".cor-piao").forEach(botao => {
+        const cor = botao.dataset.cor;
+        const piao = botao.querySelector(".piao-icone");
+
+        if (!piao || !cores[cor]) return;
+
+        // Força o símbolo a aparecer como texto.
+        piao.textContent = "\u265F\uFE0E";
+
+        // Define a cor correspondente.
+        piao.style.setProperty(
+            "color",
+            cores[cor],
+            "important"
+        );
+
+        piao.style.fontFamily =
+            "Arial, sans-serif";
+
+        piao.style.fontVariantEmoji = "text";
+        piao.style.fontSize = "32px";
+
+        if (cor === "branco") {
+            piao.style.webkitTextStroke =
+                "1px #555555";
+        }
+    });
+}
+
+// Executa a correção quando a página carregar.
+corrigirPioesCelular();
+
